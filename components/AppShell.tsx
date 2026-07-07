@@ -4,10 +4,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const NAV = [
-  { href: "/", label: "首頁" },
-  { href: "/bills/new", label: "開局" },
-  { href: "/history", label: "歷史" },
-  { href: "/girls", label: "妹名" },
+  { href: "/", label: "首頁", icon: "⌂" },
+  { href: "/bills/new", label: "開局", icon: "+" },
+  { href: "/history", label: "歷史", icon: "◷" },
+  { href: "/girls", label: "妹名", icon: "♡" },
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -17,17 +17,25 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     <div className="app-shell">
       <header className="app-head">
         <Link href="/" className="brand">
-          <span>夜帳</span>
-          <strong>NightTab</strong>
+          <span className="brand-icon">帳</span>
+          <span className="brand-copy">
+            <em>NIGHTTAB</em>
+            <strong>夜帳</strong>
+            <small>NightTab</small>
+          </span>
         </Link>
-        <Link href="/bills/new" className="primary-link">開局</Link>
       </header>
       <main>{children}</main>
       <nav className="bottom-nav" aria-label="主導覽">
         {NAV.map((item) => {
           const isActive = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
 
-          return <Link key={item.href} href={item.href} className={isActive ? "active" : undefined}>{item.label}</Link>;
+          return (
+            <Link key={item.href} href={item.href} className={isActive ? "active" : undefined}>
+              <span>{item.icon}</span>
+              <strong>{item.label}</strong>
+            </Link>
+          );
         })}
       </nav>
     </div>

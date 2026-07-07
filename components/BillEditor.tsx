@@ -133,11 +133,14 @@ export function BillEditor({
           <button type="button" className="soft-button" onClick={() => addParticipant()}>新增</button>
         </div>
         {participantShortcuts.length > 0 && (
-          <div className="shortcut-row" aria-label="常用參與者">
-            {participantShortcuts.map((name) => (
-              <button type="button" key={name} onClick={() => addParticipant(name)}>+ {name}</button>
-            ))}
-          </div>
+          <details className="inline-disclosure">
+            <summary>常用參與者</summary>
+            <div className="shortcut-row" aria-label="常用參與者">
+              {participantShortcuts.map((name) => (
+                <button type="button" key={name} onClick={() => addParticipant(name)}>+ {name}</button>
+              ))}
+            </div>
+          </details>
         )}
         <div className="row-list">
           {bill.participants.map((participant) => (
@@ -155,11 +158,14 @@ export function BillEditor({
           <div><p className="eyebrow">公費</p><h2>共同消費</h2></div>
           <button type="button" className="soft-button" onClick={() => patch({ sharedItems: [...bill.sharedItems, createSharedItem("其他")] })}>新增</button>
         </div>
-        <div className="shortcut-row" aria-label="公費快捷項目">
-          {SHARED_ITEM_SHORTCUTS.map((name) => (
-            <button type="button" key={name} onClick={() => patch({ sharedItems: [...bill.sharedItems, createSharedItem(name)] })}>+ {name}</button>
-          ))}
-        </div>
+        <details className="inline-disclosure">
+          <summary>快捷項目</summary>
+          <div className="shortcut-row" aria-label="公費快捷項目">
+            {SHARED_ITEM_SHORTCUTS.map((name) => (
+              <button type="button" key={name} onClick={() => patch({ sharedItems: [...bill.sharedItems, createSharedItem(name)] })}>+ {name}</button>
+            ))}
+          </div>
+        </details>
         <div className="row-list">
           {bill.sharedItems.map((item) => (
             <div className="money-row" key={item.id}>
@@ -261,11 +267,14 @@ export function BillEditor({
 
       <section className="card split-card">
         <div className="section-head"><div><p className="eyebrow">分帳</p><h2>每人應付</h2></div><strong>{currency(split.itemsTotal)}</strong></div>
-        <div className="split-stats">
-          <span>桌面費用 {currency(split.sharedTotal)}</span>
-          <span>每人桌面費 {currency(split.sharedPerPerson)}</span>
-          <span>個人費 {currency(split.personalItemsTotal)}</span>
-        </div>
+        <details className="inline-disclosure split-detail">
+          <summary>費用拆解</summary>
+          <div className="split-stats">
+            <span>桌面費用 {currency(split.sharedTotal)}</span>
+            <span>每人桌面費 {currency(split.sharedPerPerson)}</span>
+            <span>個人費 {currency(split.personalItemsTotal)}</span>
+          </div>
+        </details>
         {split.settlementTotal > 0 && totalDiff < 0 && <p className="warning">總金額少 {currency(Math.abs(totalDiff))}，請確認是否還有項目未補。</p>}
         {split.settlementTotal > 0 && totalDiff > 0 && <p className="warning">總金額多 {currency(totalDiff)}，請確認是否還有項目未補。</p>}
         {split.unassignedGirlItems.length > 0 && <p className="warning">有 {split.unassignedGirlItems.length} 筆妹子項目尚未指定負擔人。</p>}

@@ -26,23 +26,31 @@ export function Dashboard() {
   const thisMonth = bills.filter((bill) => bill.date.startsWith(monthPrefix));
   const monthSpend = thisMonth.reduce((sum, bill) => sum + (bill.settlementAmount || bill.totalAmount || bill.cashPrice), 0);
   const recent = bills.slice(0, 3);
+  const activeBill = bills.find((bill) => bill.stage === "open" || bill.stage === "live" || bill.stage === "checkout");
 
   return (
     <div className="page-stack">
       <section className="hero">
-        <p className="eyebrow">夜帳 NightTab</p>
-        <h1>先開局</h1>
-        <p className="hero-subtitle">乾淨分帳 不傷感情</p>
-        <Link href="/bills/new" className="primary-link large">新增 / 開局</Link>
+        <p className="eyebrow">開局</p>
+        <h1>今晚這局</h1>
+        <p className="hero-subtitle">先記人和小姐，結帳時再一次算清楚。</p>
+        <Link href="/bills/new" className="primary-link large">開新局</Link>
       </section>
-      <section className="stat-grid">
-        <article className="card stat"><span>本月總消費</span><strong>{currency(monthSpend)}</strong></article>
-        <article className="card stat"><span>常去店家</span><strong>{topLabel(bills.map((bill) => bill.storeName))}</strong></article>
-        <article className="card stat"><span>常見妹名</span><strong>{girlProfiles[0]?.name ?? "尚未記錄"}</strong></article>
+      {activeBill && (
+        <Link href={billDestination(activeBill.id, activeBill.stage)} className="continue-card">
+          <span>繼續上一局</span>
+          <strong>{activeBill.storeName || "未填店名"}</strong>
+          <em>{stageLabel(activeBill.stage)} · {shortDate(activeBill.date)}</em>
+        </Link>
+      )}
+      <section className="stat-strip" aria-label="本月摘要">
+        <article><span>本月</span><strong>{currency(monthSpend)}</strong></article>
+        <article><span>常去</span><strong>{topLabel(bills.map((bill) => bill.storeName))}</strong></article>
+        <article><span>常見</span><strong>{girlProfiles[0]?.name ?? "尚未記錄"}</strong></article>
       </section>
       <section className="card">
         <div className="section-head">
-          <div><p className="eyebrow">最近</p><h2>最近幾場局</h2></div>
+          <div><p className="eyebrow">最近</p><h2>最近幾局</h2></div>
           <Link href="/history" className="soft-link">看全部</Link>
         </div>
         {!ready && <p className="quiet">載入本機資料中。</p>}
@@ -50,7 +58,7 @@ export function Dashboard() {
         <div className="bill-list">
           {recent.map((bill) => (
             <Link className="bill-item" href={billDestination(bill.id, bill.stage)} key={bill.id}>
-              <div><strong>{bill.storeName || "未填店名"}</strong><span>{shortDate(bill.date)} · {bill.participants.length} 人 · {stageLabel(bill.stage)}</span></div>
+              <div><strong>{bill.storeName || "未填店名"}</strong><span>{stageLabel(bill.stage)} · {bill.participants.length} 人</span></div>
               <b>{currency(bill.settlementAmount || bill.totalAmount || bill.cashPrice)}</b>
             </Link>
           ))}

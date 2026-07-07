@@ -14,6 +14,7 @@ type UndoToast = { message: string; restoreKey?: string } | null;
 function GirlCard({ profile, onRequestAction }: { profile: GirlProfile; onRequestAction: (action: NonNullable<PendingGirlAction>) => void }) {
   const { saveGirlProfile } = useNightTab();
   const [notes, setNotes] = useState(profile.notes);
+  const [showNotes, setShowNotes] = useState(Boolean(profile.notes));
   const toggleTag = (tag: string) => {
     const tags = profile.tags.includes(tag) ? profile.tags.filter((item) => item !== tag) : [...profile.tags, tag];
     saveGirlProfile({ ...profile, tags, notes });
@@ -28,34 +29,20 @@ function GirlCard({ profile, onRequestAction }: { profile: GirlProfile; onReques
         <span>{profile.visitCount} 次</span>
         <span>{profile.totalSessions} 節</span>
         <span>最近 {shortDate(profile.lastSeenDate)}</span>
-        {profile.recentParticipantName && <span>最近對應 {profile.recentParticipantName}</span>}
       </div>
       <div className="tag-row">
         {TAGS.map((tag) => <button type="button" className={profile.tags.includes(tag) ? "active" : ""} key={tag} onClick={() => toggleTag(tag)}>{tag}</button>)}
       </div>
-      <label>備註<textarea value={notes} onChange={(event) => setNotes(event.target.value)} placeholder="下次提醒" /></label>
+      {showNotes && <label>備註<textarea value={notes} onChange={(event) => setNotes(event.target.value)} placeholder="下次提醒" /></label>}
       <div className="profile-actions">
+        <button type="button" className="soft-button" onClick={() => setShowNotes((current) => !current)}>{showNotes ? "收起備註" : "備註"}</button>
         <button type="button" className="soft-button" onClick={() => saveGirlProfile({ ...profile, notes })}>儲存備註</button>
         <button
           type="button"
-          className="danger-button"
+          className="soft-button"
           onClick={() => onRequestAction({ type: "hide", profile })}
         >
-          隱藏
-        </button>
-        <button
-          type="button"
-          className="danger-button"
-          onClick={() => onRequestAction({ type: "clearFile", profile })}
-        >
-          清除檔案
-        </button>
-        <button
-          type="button"
-          className="danger-button"
-          onClick={() => onRequestAction({ type: "deleteRecords", profile })}
-        >
-          永久刪除紀錄
+          管理
         </button>
       </div>
     </article>
@@ -74,6 +61,7 @@ export function GirlDirectory() {
   } = useNightTab();
   const [name, setName] = useState("");
   const [storeName, setStoreName] = useState("");
+  const [showAddSheet, setShowAddSheet] = useState(false);
   const [showHidden, setShowHidden] = useState(false);
   const [status, setStatus] = useState("");
   const [undoToast, setUndoToast] = useState<UndoToast>(null);
@@ -101,6 +89,7 @@ export function GirlDirectory() {
     setName("");
     setStoreName("");
     setStatus("已新增妹名資料。");
+    setShowAddSheet(false);
   };
   const confirmPendingAction = () => {
     if (!pendingAction) return;
@@ -119,7 +108,7 @@ export function GirlDirectory() {
     setPendingAction(null);
   };
   const pendingTitle = pendingAction?.type === "hide"
-    ? "確定隱藏這位小姐？"
+    ? "管理妹名"
     : pendingAction?.type === "clearFile"
       ? "清除妹名檔案"
       : "永久刪除小姐紀錄";
@@ -134,19 +123,44 @@ export function GirlDirectory() {
       {status && <div className="success-note action-note">{status}</div>}
       {pendingAction && (
         <div className="sheet-overlay" role="presentation" onClick={() => setPendingAction(null)}>
-          <section className="confirm-sheet" role="dialog" aria-modal="true" aria-labelledby="girl-confirm-title" onClick={(event) => event.stopPropagation()}>
+          <section className="confirm-sheet detail-sheet" role="dialog" aria-modal="true" aria-labelledby="girl-confirm-title" onClick={(event) => event.stopPropagation()}>
             <div className="sheet-handle" />
             <p className="eyebrow">{pendingAction.profile.storeName || "未填店名"}</p>
             <h2 id="girl-confirm-title">{pendingTitle}</h2>
             <strong>{pendingAction.profile.name}</strong>
-            <ul>
-              {pendingItems.map((item) => <li key={item}>{item}</li>)}
-            </ul>
-            <div className="confirm-actions">
+            <div className="sheet-detail-list">
+              {pendingItems.map((item) => <div key={item}><p>{item}</p></div>)}
+            </div>
+            {pendingAction.type === "hide" ? (
+              <div className="confirm-actions vertical">
+                <button type="button" className="soft-button" onClick={confirmPendingAction}>隱藏這位小姐</button>
+                <button type="button" className="soft-button" onClick={() => setPendingAction({ type: "clearFile", profile: pendingAction.profile })}>清除妹名檔案</button>
+                <button type="button" className="danger-button" onClick={() => setPendingAction({ type: "deleteRecords", profile: pendingAction.profile })}>永久刪除紀錄</button>
+              </div>
+            ) : (
+            <div className="confirm-actions vertical">
               <button type="button" className="soft-button" onClick={() => setPendingAction(null)}>取消</button>
               <button type="button" className="danger-button" onClick={confirmPendingAction}>
-                確認{pendingAction.type === "hide" ? "隱藏" : pendingAction.type === "clearFile" ? "清除" : "永久刪除"}
+                確認{pendingAction.type === "clearFile" ? "清除" : "永久刪除"}
               </button>
+            </div>
+            )}
+          </section>
+        </div>
+      )}
+      {showAddSheet && (
+        <div className="sheet-overlay" role="presentation" onClick={() => setShowAddSheet(false)}>
+          <section className="confirm-sheet" role="dialog" aria-modal="true" aria-labelledby="girl-add-title" onClick={(event) => event.stopPropagation()}>
+            <div className="sheet-handle" />
+            <p className="eyebrow">手動新增</p>
+            <h2 id="girl-add-title">新增妹名</h2>
+            <div className="field-grid manual-add">
+              <label>名字<input value={name} onChange={(event) => setName(event.target.value)} autoFocus /></label>
+              <label>店名<input value={storeName} onChange={(event) => setStoreName(event.target.value)} /></label>
+            </div>
+            <div className="confirm-actions">
+              <button type="button" className="soft-button" onClick={() => setShowAddSheet(false)}>取消</button>
+              <button type="button" className="primary-link" onClick={addManual}>新增</button>
             </div>
           </section>
         </div>
@@ -166,15 +180,11 @@ export function GirlDirectory() {
       <section className="card">
         <div className="section-head">
           <div><p className="eyebrow">妹名</p><h1>出現過的名字</h1></div>
-          <button type="button" className="soft-button" onClick={() => setShowHidden((current) => !current)}>
-            {showHidden ? "關閉管理" : "管理已隱藏"}
-          </button>
+          <button type="button" className="primary-link compact" onClick={() => setShowAddSheet(true)}>新增</button>
         </div>
-        <div className="field-grid manual-add">
-          <label>手動新增名字<input value={name} onChange={(event) => setName(event.target.value)} /></label>
-          <label>店名<input value={storeName} onChange={(event) => setStoreName(event.target.value)} /></label>
-        </div>
-        <button type="button" className="soft-button" onClick={addManual}>新增</button>
+        <button type="button" className="soft-button ghost-row" onClick={() => setShowHidden((current) => !current)}>
+          {showHidden ? "關閉已隱藏" : `已隱藏 ${hiddenGirlKeys.length} 筆`}
+        </button>
       </section>
       {showHidden && (
         <section className="card">
