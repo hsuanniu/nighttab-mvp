@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { AppVersionInfo } from "@/components/AppVersionInfo";
 
 const NAV = [
   { href: "/", label: "首頁", icon: "⌂" },
@@ -26,6 +27,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </Link>
       </header>
       <main>{children}</main>
+      <AppVersionInfo />
       <nav className="bottom-nav" aria-label="主導覽">
         {NAV.map((item) => {
           const isActive = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
