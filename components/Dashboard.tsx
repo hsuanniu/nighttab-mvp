@@ -34,10 +34,10 @@ export function Dashboard() {
         <p className="eyebrow">開局</p>
         <h1>今晚這局</h1>
         <p className="hero-subtitle">先記人和小姐，結帳時再一次算清楚。</p>
-        <Link href="/bills/new" className="primary-link large">開新局</Link>
+        <Link href="/bills/new" className="primary-link large" onClick={() => console.log("New bill CTA clicked")}>開新局</Link>
       </section>
       {activeBill && (
-        <Link href={billDestination(activeBill.id, activeBill.stage)} className="continue-card">
+        <Link href={billDestination(activeBill.id, activeBill.stage)} className="continue-card" onClick={() => console.log("Continue bill clicked")}>
           <span>繼續上一局</span>
           <strong>{activeBill.storeName || "未填店名"}</strong>
           <em>{stageLabel(activeBill.stage)} · {shortDate(activeBill.date)}</em>

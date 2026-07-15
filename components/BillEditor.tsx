@@ -93,6 +93,7 @@ export function BillEditor({
   };
 
   const copyLineResult = async () => {
+    console.log("Copy LINE split clicked");
     try {
       await navigator.clipboard.writeText(createLineSplitText(bill));
       setCopyStatus("已複製，可直接貼到 LINE。");
@@ -295,7 +296,16 @@ export function BillEditor({
         <label>備註<textarea value={bill.notes} onChange={(event) => patch({ notes: event.target.value })} placeholder="特殊分法、誰先代墊、店內備註" /></label>
       </section>
       {storageError && <div className="warning">{storageError}</div>}
-      <button type="button" className="save-bar" onClick={onSave}>{saveLabel}</button>
+      <button
+        type="button"
+        className="save-bar"
+        onClick={() => {
+          console.log("Save bill clicked");
+          onSave();
+        }}
+      >
+        {saveLabel}
+      </button>
     </div>
   );
 }

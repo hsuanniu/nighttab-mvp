@@ -37,6 +37,7 @@ export function LiveAssignmentWorkspace({ billId }: { billId: string }) {
     setStatus(message);
   };
   const addAssignment = (participant: Participant) => {
+    console.log("Add girl assignment clicked");
     const girlName = drafts[participant.id]?.trim();
     if (!girlName) return;
     commit({
@@ -52,6 +53,7 @@ export function LiveAssignmentWorkspace({ billId }: { billId: string }) {
     setDrafts({ ...drafts, [participant.id]: "" });
   };
   const addLateParticipant = () => {
+    console.log("Add late participant clicked");
     const name = `老闆 ${bill.participants.length + 1}`;
     commit({
       ...bill,
@@ -127,7 +129,7 @@ export function LiveAssignmentWorkspace({ billId }: { billId: string }) {
         </div>
       </section>
       <button type="button" className="soft-button ghost-row" onClick={() => setShowDeleteSheet(true)}>更多操作</button>
-      <Link className="primary-link checkout-link" href={`/bills/${bill.id}/checkout`}>結帳補金額</Link>
+      <Link className="primary-link checkout-link" href={`/bills/${bill.id}/checkout`} onClick={() => console.log("Checkout link clicked")}>結帳補金額</Link>
     </div>
   );
 }

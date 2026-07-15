@@ -22,6 +22,7 @@ export function NewBillComposer() {
   const [bill, setBill] = useState(createBill);
   const [status, setStatus] = useState("");
   const [showStartSheet, setShowStartSheet] = useState(false);
+  const [startingDestination, setStartingDestination] = useState<"live" | "checkout" | null>(null);
   const participantNames = bill.participants.map((participant) => participant.name.trim()).filter(Boolean);
   const shortcuts = commonParticipantNames.filter((name) => !participantNames.includes(name));
   const addParticipant = (name = `老闆 ${bill.participants.length + 1}`) => {
@@ -30,9 +31,17 @@ export function NewBillComposer() {
     setStatus(`已新增參與者 ${name}。`);
   };
   const start = (destination: "live" | "checkout") => {
-    const next = { ...bill, stage: destination };
-    saveBill(next);
-    router.push(`/bills/${bill.id}/${destination}`);
+    console.log(destination === "live" ? "Start record clicked" : "Checkout directly clicked");
+    if (startingDestination) return;
+    setStartingDestination(destination);
+    try {
+      const next = { ...bill, stage: destination };
+      saveBill(next);
+      setShowStartSheet(false);
+      router.push(`/bills/${bill.id}/${destination}`);
+    } finally {
+      setStartingDestination(null);
+    }
   };
 
   return (
@@ -51,8 +60,24 @@ export function NewBillComposer() {
               </div>
             </div>
             <div className="confirm-actions vertical">
-              <button type="button" className="primary-link" onClick={() => start("live")}>開始現場記錄</button>
-              <button type="button" className="soft-button" onClick={() => start("checkout")}>直接進結帳</button>
+              <button
+                type="button"
+                className="primary-link"
+                disabled={startingDestination !== null}
+                aria-busy={startingDestination === "live"}
+                onClick={() => start("live")}
+              >
+                {startingDestination === "live" ? "前往現場記錄..." : "開始現場記錄"}
+              </button>
+              <button
+                type="button"
+                className="soft-button"
+                disabled={startingDestination !== null}
+                aria-busy={startingDestination === "checkout"}
+                onClick={() => start("checkout")}
+              >
+                {startingDestination === "checkout" ? "前往結帳..." : "直接進結帳"}
+              </button>
             </div>
           </section>
         </div>
@@ -99,7 +124,16 @@ export function NewBillComposer() {
           ))}
         </div>
       </section>
-      <button type="button" className="primary-link live-action sticky-action" onClick={() => setShowStartSheet(true)}>開始</button>
+      <button
+        type="button"
+        className="primary-link live-action sticky-action"
+        onClick={() => {
+          console.log("Open start sheet clicked");
+          setShowStartSheet(true);
+        }}
+      >
+        開始
+      </button>
     </div>
   );
 }
