@@ -27,6 +27,15 @@ export function LiveAssignmentWorkspace({ billId }: { billId: string }) {
     if (stored) setBill(stored);
   }, [stored]);
 
+  useEffect(() => {
+    if (!saved) return;
+    const timer = window.setTimeout(() => {
+      setSaved(false);
+      setStatus("");
+    }, 3000);
+    return () => window.clearTimeout(timer);
+  }, [saved, status]);
+
   if (!ready) return <section className="card"><p className="quiet">讀取本局資料中。</p></section>;
   if (!bill) return <section className="card"><h1>找不到這場局</h1><Link href="/history" className="soft-link">回歷史</Link></section>;
 
@@ -37,7 +46,6 @@ export function LiveAssignmentWorkspace({ billId }: { billId: string }) {
     setStatus(message);
   };
   const addAssignment = (participant: Participant) => {
-    console.log("Add girl assignment clicked");
     const girlName = drafts[participant.id]?.trim();
     if (!girlName) return;
     commit({
@@ -53,7 +61,6 @@ export function LiveAssignmentWorkspace({ billId }: { billId: string }) {
     setDrafts({ ...drafts, [participant.id]: "" });
   };
   const addLateParticipant = () => {
-    console.log("Add late participant clicked");
     const name = `老闆 ${bill.participants.length + 1}`;
     commit({
       ...bill,
@@ -88,7 +95,7 @@ export function LiveAssignmentWorkspace({ billId }: { billId: string }) {
         <h1>{bill.storeName || "本局"} 誰坐誰</h1>
         <p className="quiet">{bill.date} · 金額和節數結帳再補。</p>
       </section>
-      {saved && <div className="success-note action-note">{status || "現場紀錄已保存。"}</div>}
+      {saved && <div className="success-note action-note" role="status">{status || "現場紀錄已保存。"}</div>}
       <section className="card">
         <div className="section-head">
           <div><p className="eyebrow">參與者</p><h2>點卡片就記小姐</h2></div>
@@ -129,7 +136,7 @@ export function LiveAssignmentWorkspace({ billId }: { billId: string }) {
         </div>
       </section>
       <button type="button" className="soft-button ghost-row" onClick={() => setShowDeleteSheet(true)}>更多操作</button>
-      <Link className="primary-link checkout-link" href={`/bills/${bill.id}/checkout`} onClick={() => console.log("Checkout link clicked")}>結帳補金額</Link>
+      <Link className="primary-link checkout-link" href={`/bills/${bill.id}/checkout`}>結帳補金額</Link>
     </div>
   );
 }

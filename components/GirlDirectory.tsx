@@ -67,6 +67,11 @@ export function GirlDirectory() {
   const [undoToast, setUndoToast] = useState<UndoToast>(null);
   const [pendingAction, setPendingAction] = useState<PendingGirlAction>(null);
   useEffect(() => {
+    if (!status) return;
+    const timer = window.setTimeout(() => setStatus(""), 3000);
+    return () => window.clearTimeout(timer);
+  }, [status]);
+  useEffect(() => {
     if (!undoToast) return;
     const timer = window.setTimeout(() => setUndoToast(null), 5000);
     return () => window.clearTimeout(timer);
@@ -120,7 +125,7 @@ export function GirlDirectory() {
 
   return (
     <div className="page-stack">
-      {status && <div className="success-note action-note">{status}</div>}
+      {status && <div className="success-note action-note" role="status">{status}</div>}
       {pendingAction && (
         <div className="sheet-overlay" role="presentation" onClick={() => setPendingAction(null)}>
           <section className="confirm-sheet detail-sheet" role="dialog" aria-modal="true" aria-labelledby="girl-confirm-title" onClick={(event) => event.stopPropagation()}>

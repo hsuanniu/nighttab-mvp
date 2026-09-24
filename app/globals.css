@@ -691,7 +691,7 @@ textarea {
 .action-note {
   position: fixed;
   right: 14px;
-  bottom: calc(88px + var(--safe-bottom));
+  bottom: calc(158px + var(--safe-bottom));
   left: 14px;
   z-index: 31;
   width: min(calc(100% - 28px), 520px);

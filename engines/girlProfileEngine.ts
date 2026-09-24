@@ -6,7 +6,6 @@ export function buildGirlProfiles(bills: Bill[], savedProfiles: GirlProfile[], h
   const hiddenKeys = new Set(hiddenGirlKeys);
   const savedByKey = new Map(savedProfiles.map((profile) => [createGirlKey(profile.name, profile.storeName), profile]));
   const aggregate = new Map<string, GirlProfile>();
-  console.log("hidden keys", hiddenGirlKeys);
 
   bills.forEach((bill) => {
     const billGirls = new Set<string>();
@@ -31,7 +30,6 @@ export function buildGirlProfiles(bills: Bill[], savedProfiles: GirlProfile[], h
       if (!name || name === "未填妹名") return;
       const storeName = normalizeGirlStoreName(item.storeName || bill.storeName);
       const key = createGirlKey(name, storeName);
-      console.log("profile key", key);
       const saved = savedByKey.get(key);
       const current = aggregate.get(key) ?? {
         id: saved?.id ?? makeId("girl-profile"),
@@ -64,15 +62,12 @@ export function buildGirlProfiles(bills: Bill[], savedProfiles: GirlProfile[], h
 
   savedProfiles.forEach((profile) => {
     const key = createGirlKey(profile.name, profile.storeName);
-    console.log("profile key", key);
     if (!aggregate.has(key)) aggregate.set(key, profile);
   });
 
   const profiles = [...aggregate.values()];
   const filteredProfiles = profiles.filter((profile) => {
     const key = createGirlKey(profile.name, profile.storeName);
-    console.log("profile key", key);
-    console.log("hidden keys", hiddenGirlKeys);
     return !hiddenKeys.has(key);
   });
 

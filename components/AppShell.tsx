@@ -30,7 +30,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <AppVersionInfo />
       <nav className="bottom-nav" aria-label="主導覽">
         {NAV.map((item) => {
-          const isActive = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
+          const isActive = item.href === "/"
+            ? pathname === "/"
+            : item.href === "/bills/new"
+              ? pathname.startsWith("/bills/")
+              : pathname.startsWith(item.href);
 
           return (
             <Link key={item.href} href={item.href} className={isActive ? "active" : undefined}>

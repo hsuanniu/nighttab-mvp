@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createBill, createParticipant } from "@/modules/bills/billFactory";
@@ -25,13 +25,19 @@ export function NewBillComposer() {
   const [startingDestination, setStartingDestination] = useState<"live" | "checkout" | null>(null);
   const participantNames = bill.participants.map((participant) => participant.name.trim()).filter(Boolean);
   const shortcuts = commonParticipantNames.filter((name) => !participantNames.includes(name));
+
+  useEffect(() => {
+    if (!status) return;
+    const timer = window.setTimeout(() => setStatus(""), 3000);
+    return () => window.clearTimeout(timer);
+  }, [status]);
+
   const addParticipant = (name = `老闆 ${bill.participants.length + 1}`) => {
     if (participantNames.includes(name.trim())) return;
     setBill({ ...bill, participants: [...bill.participants, createParticipant(name)] });
     setStatus(`已新增參與者 ${name}。`);
   };
   const start = (destination: "live" | "checkout") => {
-    console.log(destination === "live" ? "Start record clicked" : "Checkout directly clicked");
     if (startingDestination) return;
     setStartingDestination(destination);
     try {
@@ -39,14 +45,15 @@ export function NewBillComposer() {
       saveBill(next);
       setShowStartSheet(false);
       router.push(`/bills/${bill.id}/${destination}`);
-    } finally {
+    } catch {
       setStartingDestination(null);
+      setStatus("無法開局，請再試一次。");
     }
   };
 
   return (
     <div className="page-stack">
-      {status && <div className="success-note action-note">{status}</div>}
+      {status && <div className="success-note action-note" role="status">{status}</div>}
       {showStartSheet && (
         <div className="sheet-overlay" role="presentation" onClick={() => setShowStartSheet(false)}>
           <section className="confirm-sheet" role="dialog" aria-modal="true" aria-labelledby="start-sheet-title" onClick={(event) => event.stopPropagation()}>
@@ -127,10 +134,7 @@ export function NewBillComposer() {
       <button
         type="button"
         className="primary-link live-action sticky-action"
-        onClick={() => {
-          console.log("Open start sheet clicked");
-          setShowStartSheet(true);
-        }}
+        onClick={() => setShowStartSheet(true)}
       >
         開始
       </button>

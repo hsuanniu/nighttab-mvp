@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { Bill, GirlAssignment, GirlItem, Participant, SharedItem } from "@/types/nighttab";
 import { calculateSplit, money, signedMoney } from "@/engines/splitEngine";
 import {
@@ -72,6 +72,12 @@ export function BillEditor({
   const canAddGirlDraft = Boolean(girlDraft.girlName.trim() || girlDraft.amount);
   const assignmentMode = (bill.girlAssignments?.length ?? 0) > 0 || Boolean(bill.stage);
 
+  useEffect(() => {
+    if (!copyStatus) return;
+    const timer = window.setTimeout(() => setCopyStatus(""), 3000);
+    return () => window.clearTimeout(timer);
+  }, [copyStatus]);
+
   const addParticipant = (name = `老闆 ${bill.participants.length + 1}`) => {
     if (billParticipantNames.includes(name.trim())) return;
     patch({ participants: [...bill.participants, createParticipant(name)] });
@@ -93,7 +99,6 @@ export function BillEditor({
   };
 
   const copyLineResult = async () => {
-    console.log("Copy LINE split clicked");
     try {
       await navigator.clipboard.writeText(createLineSplitText(bill));
       setCopyStatus("已複製，可直接貼到 LINE。");
@@ -289,21 +294,14 @@ export function BillEditor({
           ))}
         </div>
         {showLineCopyAction && <button type="button" className="soft-button line-copy" onClick={() => void copyLineResult()}>複製 LINE 分帳結果</button>}
-        {copyStatus && <p className={copyStatus.startsWith("已複製") ? "success-note action-note" : "warning"}>{copyStatus}</p>}
+        {copyStatus && <p className={copyStatus.startsWith("已複製") ? "success-note action-note" : "warning"} role="status">{copyStatus}</p>}
       </section>
 
       <section className="card">
         <label>備註<textarea value={bill.notes} onChange={(event) => patch({ notes: event.target.value })} placeholder="特殊分法、誰先代墊、店內備註" /></label>
       </section>
       {storageError && <div className="warning">{storageError}</div>}
-      <button
-        type="button"
-        className="save-bar"
-        onClick={() => {
-          console.log("Save bill clicked");
-          onSave();
-        }}
-      >
+      <button type="button" className="save-bar" onClick={onSave}>
         {saveLabel}
       </button>
     </div>

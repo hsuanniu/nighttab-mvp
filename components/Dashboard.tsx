@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useNightTab } from "@/store/NightTabProvider";
 import { currency, shortDate } from "@/modules/format";
+import { localDate } from "@/modules/bills/billFactory";
 
 function topLabel(values: string[]) {
   const counts = new Map<string, number>();
@@ -22,7 +23,7 @@ function stageLabel(stage?: string) {
 
 export function Dashboard() {
   const { bills, girlProfiles, ready } = useNightTab();
-  const monthPrefix = new Date().toISOString().slice(0, 7);
+  const monthPrefix = localDate().slice(0, 7);
   const thisMonth = bills.filter((bill) => bill.date.startsWith(monthPrefix));
   const monthSpend = thisMonth.reduce((sum, bill) => sum + (bill.settlementAmount || bill.totalAmount || bill.cashPrice), 0);
   const recent = bills.slice(0, 3);
@@ -34,10 +35,10 @@ export function Dashboard() {
         <p className="eyebrow">開局</p>
         <h1>今晚這局</h1>
         <p className="hero-subtitle">先記人和小姐，結帳時再一次算清楚。</p>
-        <Link href="/bills/new" className="primary-link large" onClick={() => console.log("New bill CTA clicked")}>開新局</Link>
+        <Link href="/bills/new" className="primary-link large">開新局</Link>
       </section>
       {activeBill && (
-        <Link href={billDestination(activeBill.id, activeBill.stage)} className="continue-card" onClick={() => console.log("Continue bill clicked")}>
+        <Link href={billDestination(activeBill.id, activeBill.stage)} className="continue-card">
           <span>繼續上一局</span>
           <strong>{activeBill.storeName || "未填店名"}</strong>
           <em>{stageLabel(activeBill.stage)} · {shortDate(activeBill.date)}</em>
